@@ -109,6 +109,7 @@ def verify_decode_jwt(token):
                 audience=API_AUDIENCE,
                 issuer='https://' + AUTH0_DOMAIN + '/'
             )
+            print('payload:', payload)
             return payload
         
         except jwt.ExpiredSignatureError:
@@ -150,7 +151,20 @@ def verify_decode_jwt(token):
     return true otherwise
 '''
 def check_permissions(permission, payload):
-    raise Exception('Not Implemented')
+    if 'permissions' not in payload:
+        raise AuthError(
+            {'code': 'invalid_claims',
+             'description': 'Permission not included in JWT.'
+            }, 400
+        )
+    
+    if permission not in payload['permissions']:
+        raise AuthError(
+            {'code': 'unauthorized',
+             'description': 'Permission not found.'
+            }, 403
+        )
+    return True
 
 
 '''
