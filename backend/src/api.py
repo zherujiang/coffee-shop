@@ -29,6 +29,23 @@ CORS(app)
         or appropriate status code indicating reason for failure
 '''
 
+@app.route('/drinks')
+@requires_auth(permission='get:drinks')
+def view_drinks(payload):
+    print('payload:', payload)
+    drinks_query = Drink.query.order_by(Drink.id).all()
+    drinks = list()
+    
+    if drinks_query:
+        abort(404)
+    else:
+        for drink in drinks_query:
+            drinks.append(drink.short())
+            
+        return jsonify({
+            'success': True,
+            'drinks': drinks
+        })
 
 '''
 @TODO implement endpoint
@@ -39,7 +56,25 @@ CORS(app)
         or appropriate status code indicating reason for failure
 '''
 
-
+@app.route('/drinks-detail')
+@requires_auth(permission='get:drinks-detail')
+def view_drinks_detail(payload):
+    print('payload:', payload)
+    drinks_query = Drink.query.order_by(Drink.id).all()
+    drinks = list()
+    
+    if not drinks_query:
+        abort(404)
+    else:
+        for drink in drinks_query:
+            drinks.append(drink.long())
+            
+        return jsonify({
+            'success': True,
+            'drinks': drinks
+        })
+        
+        
 '''
 @TODO implement endpoint
     POST /drinks
@@ -49,7 +84,27 @@ CORS(app)
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
-
+@app.route('/drinks', methods=['POST'])
+@requires_auth(permission='post:drinks')
+def create_drinks(payload):
+    print('payload:', payload)
+    body = request.get_json()
+    # if body is None:
+    #     abort(400)
+        
+    # try:
+    #     title = body.get('title')
+    #     recipe = body.get('recipe')
+    #     print(recipe)
+    #     new_drink = Drink(title = title, recipe = recipe)
+    #     new_drink.insert()
+    # except:
+    #     abort(400)
+    # return jsonify({
+    #     'success': True,
+    #     'drinks': new_drink.long()
+    # })
+    raise Exception('not implemented')
 
 '''
 @TODO implement endpoint
@@ -78,9 +133,8 @@ CORS(app)
 
 # Error Handling
 '''
-Example error handling for unprocessable entity
+Error handling for unprocessable entity
 '''
-
 
 @app.errorhandler(422)
 def unprocessable(error):
@@ -106,9 +160,30 @@ def unprocessable(error):
 @TODO implement error handler for 404
     error handler should conform to general task above
 '''
-
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({
+        "success": False,
+        "error": 404,
+        "message": "resource not found"
+    }), 404
 
 '''
 @TODO implement error handler for AuthError
     error handler should conform to general task above
 '''
+@app.errorhandler(401)
+def unauthorized(error):
+    return jsonify({
+        "success": False,
+        "error": 401,
+        "message": "unauthorized"
+    }), 401
+
+@app.errorhandler(AuthError)
+def authentication_error(error):
+    return jsonify({
+        "success": False,
+        "error": error.status_code,
+        "message": error.error
+    }), 401

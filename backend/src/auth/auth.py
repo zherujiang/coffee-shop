@@ -1,9 +1,9 @@
 import json
-from flask import request, _request_ctx_stack
+from flask import request, _request_ctx_stack, abort
 from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
-
+# from ..api import unauthorized
 
 AUTH0_DOMAIN = 'dev--i8oazrv.us.auth0.com'
 ALGORITHMS = ['RS256']
@@ -80,8 +80,8 @@ def verify_decode_jwt(token):
     jwks = json.loads(jsonurl.read())
     token_header = jwt.get_unverified_header(token)
     rsa_key = dict()
-    print(token_header)
-    print(jwks)
+    print('unverified token header', token_header)
+    print('jwks', jwks)
     
     if 'kid' not in token_header:
         raise AuthError(
@@ -130,7 +130,6 @@ def verify_decode_jwt(token):
                 'description': 'Unable to parse authentication token.'
                 }, 400
             )
-    
     # raise exception when rsa_key is None
     raise AuthError(
         {'code': 'invalid_header',
@@ -182,9 +181,13 @@ def requires_auth(permission=''):
         @wraps(f)
         def wrapper(*args, **kwargs):
             token = get_token_auth_header()
-            payload = verify_decode_jwt(token)
+            try:
+                payload = verify_decode_jwt(token)
+            except:
+                abort(401)
             check_permissions(permission, payload)
             return f(payload, *args, **kwargs)
-
+                
         return wrapper
+    
     return requires_auth_decorator
