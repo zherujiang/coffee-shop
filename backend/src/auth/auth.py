@@ -32,6 +32,7 @@ class AuthError(Exception):
 '''
 def get_token_auth_header():
     auth_header = request.headers.get('Authorization', None)
+    #print('auth header:', auth_header)
     if not auth_header:
         raise AuthError(
             {'code': 'authorization_header_missing',
@@ -40,7 +41,7 @@ def get_token_auth_header():
         )
         
     header_parts = auth_header.split(' ')
-    if header_parts[0].lower != 'bearer':
+    if header_parts[0].lower() != 'bearer':
         raise AuthError(
             {'code': 'invalid_header',
              'description': 'Authorization header must start with "Bearer".'
@@ -76,13 +77,13 @@ def get_token_auth_header():
     !!NOTE urlopen has a common certificate error described here: https://stackoverflow.com/questions/50236117/scraping-ssl-certificate-verify-failed-error-for-http-en-wikipedia-org
 '''
 def verify_decode_jwt(token):
+    token_header = jwt.get_unverified_header(token)
+    print('unverified token header:', token_header)
     jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
     jwks = json.loads(jsonurl.read())
-    token_header = jwt.get_unverified_header(token)
     rsa_key = dict()
-    print('unverified token header', token_header)
-    print('jwks', jwks)
-    
+    #print('jwks', jwks)
+        
     if 'kid' not in token_header:
         raise AuthError(
             {'code': 'invalid_header',
@@ -92,6 +93,7 @@ def verify_decode_jwt(token):
     
     for key in jwks['keys']:
         if key['kid'] == token_header['kid']:
+            #print('found matching kid')
             rsa_key = {
                 'kty': key['kty'],
                 'kid': key['kid'],
@@ -99,9 +101,11 @@ def verify_decode_jwt(token):
                 'n': key['n'],
                 'e': key['e']
             }
+            print('rsa key:', rsa_key)
     
     if rsa_key:
         try:
+            print('decoding')
             payload = jwt.decode(
                 token,
                 rsa_key,
@@ -181,10 +185,7 @@ def requires_auth(permission=''):
         @wraps(f)
         def wrapper(*args, **kwargs):
             token = get_token_auth_header()
-            try:
-                payload = verify_decode_jwt(token)
-            except:
-                abort(401)
+            payload = verify_decode_jwt(token)
             check_permissions(permission, payload)
             return f(payload, *args, **kwargs)
                 

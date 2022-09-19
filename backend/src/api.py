@@ -32,11 +32,10 @@ CORS(app)
 @app.route('/drinks')
 @requires_auth(permission='get:drinks')
 def view_drinks(payload):
-    print('payload:', payload)
     drinks_query = Drink.query.order_by(Drink.id).all()
     drinks = list()
     
-    if drinks_query:
+    if not drinks_query:
         abort(404)
     else:
         for drink in drinks_query:
@@ -59,7 +58,6 @@ def view_drinks(payload):
 @app.route('/drinks-detail')
 @requires_auth(permission='get:drinks-detail')
 def view_drinks_detail(payload):
-    print('payload:', payload)
     drinks_query = Drink.query.order_by(Drink.id).all()
     drinks = list()
     
