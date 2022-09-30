@@ -39,6 +39,7 @@ def view_drinks(payload):
         abort(404)
     else:
         for drink in drinks_query:
+            print('drink', drink)
             drinks.append(drink.short())
             
         return jsonify({
@@ -85,24 +86,24 @@ def view_drinks_detail(payload):
 @app.route('/drinks', methods=['POST'])
 @requires_auth(permission='post:drinks')
 def create_drinks(payload):
-    print('payload:', payload)
     body = request.get_json()
-    # if body is None:
-    #     abort(400)
-        
-    # try:
-    #     title = body.get('title')
-    #     recipe = body.get('recipe')
-    #     print(recipe)
-    #     new_drink = Drink(title = title, recipe = recipe)
-    #     new_drink.insert()
-    # except:
-    #     abort(400)
-    # return jsonify({
-    #     'success': True,
-    #     'drinks': new_drink.long()
-    # })
-    raise Exception('not implemented')
+    if body is None:
+        abort(400)
+    else:
+        try:
+            title = body.get('title')
+            recipe = body.get('recipe')
+            #recipe is an array, convert to json string before storing in database
+            recipe_json = json.dumps(recipe)
+            print('recipe', recipe_json)
+            new_drink = Drink(title = title, recipe = recipe_json)
+            new_drink.insert()
+        except:
+            abort(400)
+        return jsonify({
+            'success': True,
+            'drinks': new_drink.long()
+        })
 
 '''
 @TODO implement endpoint

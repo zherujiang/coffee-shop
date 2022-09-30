@@ -17,7 +17,7 @@
         <ion-card-content>
             <app-drink-graphic [drink]="drinks.items[drink]"></app-drink-graphic>
         </ion-card-content>
-      </ion-card>
+    </ion-card>
     <ion-card
      style="opacity: .7; align-items: center; display: flex; flex-direction: column; cursor: pointer;" 
      *ngIf="auth.can('post:drinks')"
@@ -29,6 +29,6 @@
         <ion-card-content style="color:grey; font-size: 256%;">
             <ion-icon name="add-circle"></ion-icon>
         </ion-card-content>
-      </ion-card>
+    </ion-card>
 </div>
 </ion-content>

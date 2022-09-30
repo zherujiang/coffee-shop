@@ -101,11 +101,10 @@ def verify_decode_jwt(token):
                 'n': key['n'],
                 'e': key['e']
             }
-            print('rsa key:', rsa_key)
+            #print('rsa key:', rsa_key)
     
     if rsa_key:
         try:
-            print('decoding')
             payload = jwt.decode(
                 token,
                 rsa_key,
