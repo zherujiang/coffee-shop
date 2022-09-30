@@ -78,7 +78,7 @@ class Drink(db.Model):
     '''
 
     def long(self):
-        print(self.recipe)
+        #print(self.recipe)
         return {
             'id': self.id,
             'title': self.title,

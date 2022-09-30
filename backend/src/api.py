@@ -99,7 +99,7 @@ def create_drinks(payload):
             new_drink = Drink(title = title, recipe = recipe_json)
             new_drink.insert()
         except:
-            abort(400)
+            abort(422)
         return jsonify({
             'success': True,
             'drinks': new_drink.long()
@@ -116,7 +116,30 @@ def create_drinks(payload):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
-
+@app.route('/drinks/<drink_id>', methods=['PATCH'])
+@requires_auth(permission='patch:drinks')
+def edit_drinks(payload, drink_id):
+    body = request.get_json()
+    if body is None:
+        abort(400)
+    try:
+        current_drink = Drink.query.filter(Drink.id == drink_id).one_or_none()
+        if current_drink is None:
+            abort(404)
+        title = body.get('title')
+        recipe = body.get('recipe')
+        #recipe is an array, convert to json string before storing in database
+        recipe_json = json.dumps(recipe)
+        
+        current_drink.title = title
+        current_drink.recipe = recipe_json
+        current_drink.update()
+    except:
+        abort(422)
+    return jsonify({
+        'success': True,
+        'drinks': current_drink.long()
+    })
 
 '''
 @TODO implement endpoint
@@ -128,6 +151,20 @@ def create_drinks(payload):
     returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks/<drink_id>', methods=['DELETE'])
+@requires_auth(permission='delete:drinks')
+def delete_drinks(payload, drink_id):
+    current_drink = Drink.query.filter(Drink.id == drink_id).one_or_none()
+    if current_drink is None:
+        abort(404)
+    try:
+        current_drink.delete()
+    except:
+        abort(422)
+    return jsonify({
+        'success': True,
+        'id': current_drink.id
+    })
 
 
 # Error Handling
