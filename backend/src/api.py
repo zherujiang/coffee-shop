@@ -80,7 +80,7 @@ def view_drinks_detail(payload):
         it should create a new row in the drinks table
         it should require the 'post:drinks' permission
         it should contain the drink.long() data representation
-    returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
+    returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing all drinks
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks', methods=['POST'])
@@ -98,11 +98,17 @@ def create_drinks(payload):
             print('recipe', recipe_json)
             new_drink = Drink(title = title, recipe = recipe_json)
             new_drink.insert()
+            
+            drinks = list()
+            drinks_query = Drink.query.order_by(Drink.id).all()
+            for drink in drinks_query:
+                drinks.append(drink.long())
+                
         except:
             abort(422)
         return jsonify({
             'success': True,
-            'drinks': new_drink.long()
+            'drinks': drinks
         })
 
 '''
