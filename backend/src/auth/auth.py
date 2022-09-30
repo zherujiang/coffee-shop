@@ -77,12 +77,18 @@ def get_token_auth_header():
     !!NOTE urlopen has a common certificate error described here: https://stackoverflow.com/questions/50236117/scraping-ssl-certificate-verify-failed-error-for-http-en-wikipedia-org
 '''
 def verify_decode_jwt(token):
-    token_header = jwt.get_unverified_header(token)
+    try:
+        token_header = jwt.get_unverified_header(token)
+    except:
+        raise AuthError(
+            {'code': 'invalid_header',
+             'description':'Invalid token format.'
+            }, 401
+        )
     print('unverified token header:', token_header)
     jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
     jwks = json.loads(jsonurl.read())
     rsa_key = dict()
-    #print('jwks', jwks)
         
     if 'kid' not in token_header:
         raise AuthError(
@@ -93,7 +99,6 @@ def verify_decode_jwt(token):
     
     for key in jwks['keys']:
         if key['kid'] == token_header['kid']:
-            #print('found matching kid')
             rsa_key = {
                 'kty': key['kty'],
                 'kid': key['kid'],
@@ -101,7 +106,6 @@ def verify_decode_jwt(token):
                 'n': key['n'],
                 'e': key['e']
             }
-            #print('rsa key:', rsa_key)
     
     if rsa_key:
         try:
