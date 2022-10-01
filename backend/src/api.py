@@ -39,7 +39,6 @@ def view_drinks(payload):
         abort(404)
     else:
         for drink in drinks_query:
-            print('drink', drink)
             drinks.append(drink.short())
             
         return jsonify({
