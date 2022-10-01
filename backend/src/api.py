@@ -140,11 +140,13 @@ def edit_drinks(payload, drink_id):
         current_drink.title = title
         current_drink.recipe = recipe_json
         current_drink.update()
+        drinks = list()
+        drinks.append(current_drink.long())
     except:
         abort(422)
     return jsonify({
         'success': True,
-        'drinks': current_drink.long()
+        'drinks': drinks
     })
 
 '''
@@ -228,4 +230,4 @@ def authentication_error(error):
         "success": False,
         "error": error.status_code,
         "message": error.error
-    }), 401
+    }), error.status_code
