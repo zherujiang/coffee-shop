@@ -30,8 +30,7 @@ db_drop_and_create_all()
 '''
 
 @app.route('/drinks')
-@requires_auth(permission='get:drinks')
-def view_drinks(payload):
+def view_drinks():
     drinks_query = Drink.query.order_by(Drink.id).all()
     drinks = list()
     
@@ -93,8 +92,11 @@ def create_drinks(payload):
             title = body.get('title')
             recipe = body.get('recipe')
             #recipe is an array, convert to json string before storing in database
-            recipe_json = json.dumps(recipe)
-            print('recipe', recipe_json)
+            if isinstance(recipe, list):
+                recipe_json = json.dumps(recipe)
+            else:
+                recipe_json = json.dumps([recipe])
+            print('recipe json', recipe_json)
             new_drink = Drink(title = title, recipe = recipe_json)
             new_drink.insert()
             
@@ -103,7 +105,8 @@ def create_drinks(payload):
             for drink in drinks_query:
                 drinks.append(drink.long())
                 
-        except:
+        except Exception as e:
+            print(e)
             abort(422)
         return jsonify({
             'success': True,
@@ -125,23 +128,27 @@ def create_drinks(payload):
 @requires_auth(permission='patch:drinks')
 def edit_drinks(payload, drink_id):
     body = request.get_json()
+    current_drink = Drink.query.filter(Drink.id == drink_id).one_or_none()
     if body is None:
         abort(400)
+    if current_drink is None:
+        abort(404)
     try:
-        current_drink = Drink.query.filter(Drink.id == drink_id).one_or_none()
-        if current_drink is None:
-            abort(404)
         title = body.get('title')
         recipe = body.get('recipe')
         #recipe is an array, convert to json string before storing in database
-        recipe_json = json.dumps(recipe)
+        if isinstance(recipe, list):
+            recipe_json = json.dumps(recipe)
+        else:
+            recipe_json = json.dumps([recipe])
         
         current_drink.title = title
         current_drink.recipe = recipe_json
         current_drink.update()
         drinks = list()
         drinks.append(current_drink.long())
-    except:
+    except Exception as e:
+        print(e)
         abort(422)
     return jsonify({
         'success': True,
