@@ -44,7 +44,7 @@ conda activate [project name]
 
 #### Pip Dependencies
 
-Once you have your virtual environment setup and activated, navigate to the project folder and go to the `/backend` directory to install python dependencies.
+Once you have your virtual environment setup and activated, navigate to the project folder and go to the `./backend` directory to install python dependencies.
 
 ```bash
 cd backend
@@ -69,7 +69,7 @@ nmp install
 
 ### Running the server
 
-Start the server from within the `./src` directory. Each time you open a new terminal session, run:
+Start the server from within the `./backend/src` directory. Each time you open a new terminal session, run:
 
 ```
 export FLASK_APP=api.py
@@ -84,7 +84,7 @@ If you include the `--reload` flag, it will detect file changes and restart the 
 
 ### Running frontend in Dev mode
 
-Ionic ships with a useful development server which detects changes and transpiles as you work. The application is then accessible through the browser on a localhost port. To run the development server, navigate into the frontend directory and run:
+Ionic ships with a useful development server which detects changes and transpiles as you work. The application is then accessible through the browser on a localhost port. To run the development server, navigate into the `./frontend` directory and run:
 
 ```
 ionic serve
@@ -92,7 +92,7 @@ ionic serve
 
 ## Key software design related to Authentication and Authorization
 
-The authentication system used for this app is Auth0. To create your own Coffee Shop app, register a new Auth0 account and configure the environment variables in `./src/environments/environments.ts` to match your own applicaiton.
+The authentication system used for this app is Auth0. To create your own Coffee Shop app, register a new Auth0 account and configure the environment variables in `./frontend/src/environments/environments.ts` to match your own applicaiton.
 
 ### Setup Auth0
 
@@ -121,8 +121,8 @@ Open the configuration file in the fronend folder `./frontend/src/environments/e
 
 ### Authentication
 
-`./src/app/services/auth.service.ts` contains the logic to direct a user to the Auth0 login page, managing the JWT token upon successful callback, and handle setting and retrieving the token from the local store. This token is then consumed by our DrinkService (`./src/app/services/drinks.service.ts`) and passed as an Authorization header when making requests to our backend.
+`./frontend/src/app/services/auth.service.ts` contains the logic to direct a user to the Auth0 login page, managing the JWT token upon successful callback, and handle setting and retrieving the token from the local store. This token is then consumed by our DrinkService (`./frontend/src/app/services/drinks.service.ts`) and passed as an Authorization header when making requests to our backend.
 
 ### Authorization
 
-The Auth0 JWT includes claims for permissions based on the user's role within the Auth0 system. This project makes use of these claims using the `auth.can(permission)` method which checks if particular permissions exist within the JWT permissions claim of the currently logged in user. This method is defined in `./src/app/services/auth.service.ts` and is then used to enable and disable buttons in `./src/app/pages/drink-menu/drink-form/drink-form.html.`
+The Auth0 JWT includes claims for permissions based on the user's role within the Auth0 system. This project makes use of these claims using the `auth.can(permission)` method which checks if particular permissions exist within the JWT permissions claim of the currently logged in user. This method is defined in `./frontend/src/app/services/auth.service.ts` and is then used to enable and disable buttons in `./frontend/src/app/pages/drink-menu/drink-form/drink-form.html.`
